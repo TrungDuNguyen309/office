@@ -1265,8 +1265,64 @@
 </section>
 <!-- loader -->
 <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const username = localStorage.getItem('Username');
+        const role = localStorage.getItem('Role');
+        // Toggle dropdown on click
+        userMenu.addEventListener('click', function (event) {
+            event.preventDefault(); // Ngừng sự kiện mặc định
+            userInfo.classList.toggle('show'); // Thêm hoặc bỏ class "show"
+        });
 
+        // Đảm bảo khi click ra ngoài thì dropdown sẽ đóng
+        document.addEventListener('click', function (event) {
+            if (!userInfo.contains(event.target)) {
+                userInfo.classList.remove('show');
+            }
+        });
+        if (username && role) {
+            document.getElementById('userInfo').style.display = 'block';
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('dropdownUsername').textContent = username;
+            document.getElementById('dropdownRole').textContent = role.charAt(0) + role.slice(1).toLowerCase();
 
+            if (role === 'ADMIN') {
+                document.getElementById('meeting').style.display = 'none';
+            } else if (role === 'EMPLOYEE') {
+                document.getElementById('office').style.display = 'none';
+                document.getElementById('account').style.display = 'none';
+                document.getElementById('dpment').style.display = 'none';
+            } else if (role === 'SUPERVISOR') {
+                document.getElementById('office').style.display = 'none';
+                document.getElementById('meeting').style.display = 'none';
+                document.getElementById('dpment').style.display = 'none';
+            }
+        }
+    });
+
+    function logout() {
+        fetch('/api/v1/users/logout', {
+            method: 'POST',
+            credentials: 'include',
+        })
+            .then(response => {
+                if (response.ok) {
+                    localStorage.clear();
+                    document.cookie.split(";").forEach(function(c) {
+                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                    });
+                    window.location.href = "/users/login";
+                } else {
+                    alert("Đăng xuất không thành công. Vui lòng thử lại.");
+                }
+            })
+            .catch(error => {
+                console.error("Logout error:", error);
+                alert("Lỗi trong quá trình đăng xuất.");
+            });
+    }
+</script>
 <script src="/js/jquery.min.js"></script>
 <script src="/js/jquery-migrate-3.0.1.min.js"></script>
 <script src="/js/popper.min.js"></script>
